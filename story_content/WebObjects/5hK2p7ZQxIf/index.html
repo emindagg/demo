@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sıcaklık ve Yağış Grafiği</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <canvas id="chartCanvas"></canvas>
+
+    <script>
+        function generateChart(temperatures, precipitation) {
+            const minTemp = Math.min(...temperatures);
+            const maxTemp = Math.max(...temperatures);
+            const maxRain = Math.max(...precipitation);
+
+            const tempAxisMin = minTemp - 20;
+            const tempAxisMax = maxTemp + 10;
+            const rainAxisMax = maxRain + 50;
+
+            const ctx = document.getElementById('chartCanvas').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"],
+                    datasets: [
+                        {
+                            label: 'Yağış (mm)',
+                            data: precipitation,
+                            backgroundColor: 'rgb(45, 118, 183)',
+                            yAxisID: 'y2',
+                            order: 2
+                        },
+                        {
+                            label: 'Sıcaklık (°C)',
+                            data: temperatures,
+                            type: 'line',
+                            borderColor: 'red',
+                            backgroundColor: 'red',
+                            pointBackgroundColor: 'black',
+                            pointBorderColor: 'black',
+                            fill: false,
+                            borderWidth: 4,
+                            yAxisID: 'y1',
+                            order: 1
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 22
+                                }
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            position: 'left',
+                            min: tempAxisMin,
+                            max: tempAxisMax,
+                            ticks: {
+                                font: {
+                                    size: 22
+                                }
+                            }
+                        },
+                        y2: {
+                            type: 'linear',
+                            position: 'right',
+                            beginAtZero: true,
+                            max: rainAxisMax,
+                            ticks: {
+                                font: {
+                                    size: 22
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                font: {
+                                    size: 22
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Articulate Storyline Player'ı alma
+        var player;
+        function GetPlayer() {
+            return player = window.parent.GetPlayer();
+        }
+
+        // Articulate Storyline'dan verileri alma ve grafiği güncelleme
+        function updateChart() {
+            const temperatures = [];
+            const precipitation = [];
+
+            for (let i = 1; i <= 12; i++) {
+                temperatures.push(parseFloat(player.GetVar(`Temp${i}`)));
+                precipitation.push(parseFloat(player.GetVar(`Rain${i}`)));
+            }
+
+            generateChart(temperatures, precipitation);
+        }
+
+        // Sayfa yüklendiğinde player'ı al
+        window.onload = function() {
+            GetPlayer();
+            // Dışarıdan çağrılabilir bir fonksiyon yarat
+            window.updateChart = updateChart;
+        }
+    </script>
+</body>
+</html>
